@@ -52,7 +52,7 @@ module FoucaultHttp
         # faraday.use :http_cache, caching if caching
         faraday.request  encoding if encoding
         if Configuration.config.logger && Configuration.config.log_formatter
-          faraday.response :logger, Configuration.config.logger, formatter: Configuration.config.log_formatter
+          faraday.response :logger, Configuration.config.logger, formatter: Configuration.config.network_log_formatter
         elsif Configuration.config.logger
           faraday.response :logger, Configuration.config.logger
         else
