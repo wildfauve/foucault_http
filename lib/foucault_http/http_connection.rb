@@ -1,5 +1,7 @@
 require 'faraday'
+require 'faraday/logging/formatter'
 require 'typhoeus'
+
 module FoucaultHttp
 
   class HttpConnection
