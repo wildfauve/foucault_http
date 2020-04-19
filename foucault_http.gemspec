@@ -34,7 +34,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-monads', "~> 1.0"
   spec.add_dependency 'dry-configurable'
   spec.add_dependency 'funcify'
-  spec.add_dependency 'typhoeus'
   spec.add_dependency 'faraday', '~> 1.0'
   spec.add_dependency "dry-types"
   spec.add_dependency "dry-struct"

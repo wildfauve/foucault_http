@@ -61,7 +61,7 @@ module FoucaultHttp
             log.filter(/(Basic.)(.+)/, '\1[REMOVED]')
           end
         end
-        faraday.adapter  :typhoeus
+        faraday.adapter  :net_http
       end
       faraday_connection
     end
