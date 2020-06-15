@@ -30,13 +30,13 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'stoplight'
+  spec.add_dependency 'stoplight', "~> 2.2"
   spec.add_dependency 'dry-monads', "~> 1.0"
-  spec.add_dependency 'dry-configurable'
-  spec.add_dependency 'funcify'
+  spec.add_dependency 'dry-configurable', "~> 0.11"
+  spec.add_dependency 'funcify', "~> 0.4"
   spec.add_dependency 'faraday', '~> 1.0'
-  spec.add_dependency "dry-types"
-  spec.add_dependency "dry-struct"
+  spec.add_dependency "dry-types", "~> 1.4"
+  spec.add_dependency "dry-struct", "~> 1.3"
 
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 13.0"

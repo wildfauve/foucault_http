@@ -44,11 +44,24 @@ RSpec.describe FoucaultHttp::Net do
 
       expect(faraday_request_object).to receive(:post).and_yield(faraday_request_object).and_return(json_response)
 
-      result = subject.post.({}, "http://api.example.com", "/resource", {}, nil, subject.json_body_fn, {message: "some message"})
+      result = subject.post.({}, "http://api.example.com", "/resource", {}, {}, nil, subject.json_body_fn, {message: "some message"})
 
       expect(result).to be_success
       expect(result.value_or.status).to be :ok
       expect(result.value_or.body).to eq({"message" => "I am json"})
+
+    end
+
+    it 'fails to generate hash to JSON' do
+      expect(Faraday).to receive(:new).with(url: "http://api.example.com/resource").and_yield(faraday_connection_object)
+
+      allow(JSON).to receive(:generate).and_raise(JSON::GeneratorError.new("source sequence is illegal/malformed utf-8"))
+
+      result = subject.post.({}, "http://api.example.com", "/resource", {}, {}, nil, subject.json_body_fn, {message: "some message"})
+
+      expect(result).to be_failure
+      expect(result.failure.exception).to eq({:exception_class=>"JSON::GeneratorError", :exception=>"source sequence is illegal/malformed utf-8"})
+      expect(result.failure.code).to eq 418
 
     end
 
@@ -57,7 +70,7 @@ RSpec.describe FoucaultHttp::Net do
 
       expect(faraday_request_object).to receive(:post).and_yield(faraday_request_object).and_return(json_response)
 
-      caller = Fn.wrapper.(subject.post.({}, "http://api.example.com", "/resource", {}, nil, subject.json_body_fn, {message: "some message"}))
+      caller = Fn.wrapper.(subject.post.({}, "http://api.example.com", "/resource", {}, {}, nil, subject.json_body_fn, {message: "some message"}))
 
       circuit = FoucaultHttp::Circuit.new(name: "http_test")
 
@@ -74,7 +87,7 @@ RSpec.describe FoucaultHttp::Net do
 
       expect(faraday_request_object).to receive(:post).and_yield(faraday_request_object).and_return(no_content_response)
 
-      result = subject.post.({}, "http://api.example.com", "/resource", {}, nil, subject.json_body_fn, {message: "some message"})
+      result = subject.post.({}, "http://api.example.com", "/resource", {}, {}, nil, subject.json_body_fn, {message: "some message"})
 
       expect(result).to be_failure
       expect(result.failure.status).to be :system_failure
@@ -84,7 +97,7 @@ RSpec.describe FoucaultHttp::Net do
 
     it 'fails when the URL is invalid' do
 
-      result = subject.post.({}, nil, nil, {}, nil, subject.json_body_fn, {message: "some message"})
+      result = subject.post.({}, nil, nil, {}, {}, nil, subject.json_body_fn, {message: "some message"})
 
       expect(result).to be_failure
 
@@ -122,7 +135,7 @@ RSpec.describe FoucaultHttp::Net do
       expect(faraday_request_object).to receive(:params=).with({param1: 1})
 
 
-      result = subject.get.({}, "http://api.example.com", "/resource", {authorization: "uid:pwd"}, :url_encoded, {param1: 1})
+      result = subject.get.({}, "http://api.example.com", "/resource", {}, {authorization: "uid:pwd"}, :url_encoded, {param1: 1})
 
       expect(result).to be_success
       expect(result.value_or.body).to eq({"message"=>"I am json"})

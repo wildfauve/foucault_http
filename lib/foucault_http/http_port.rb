@@ -18,39 +18,39 @@ module FoucaultHttp
     class << self
 
       def post
-        -> correlation, service, resource, hdrs, body_fn, enc, body {
+        -> correlation, service, resource, opts, hdrs, body_fn, enc, body {
           ( Fn.either.(net_ok).(Monad.success).(Monad.failure) <<
             log_response.(correlation, service, resource, __method__) <<
             response_value <<
             run_post.(hdrs, body_fn, body) <<
-            addressed.(service, resource)).(connection.(enc))
+            addressed.(service, resource)).(connection.(opts, enc))
         }
       end
 
       def get
-        -> correlation, service, resource, hdrs, enc, query {
+        -> correlation, service, resource, opts, hdrs, enc, query {
           ( Fn.either.(net_ok).(Monad.success).(Monad.failure) <<
             log_response.(correlation, service, resource, __method__) <<
             response_value <<
             run_get.(hdrs, query) <<
-            addressed.(service, resource)).(connection.(enc))
+            addressed.(service, resource)).(connection.(opts, enc))
         }
       end
 
       def delete
-        -> correlation, service, resource, hdrs {
+        -> correlation, service, resource, opts, hdrs {
           ( Fn.either.(net_ok).(Monad.success).(Monad.failure) <<
             log_response.([], service, resource, __method__) <<
             response_value <<
             run_delete.(hdrs) <<
-            addressed.(service, resource)).(connection.(nil))
+            addressed.(service, resource)).(connection.(opts, nil))
         }
       end
 
 
       def run_post
         -> hdrs, body_fn, body, connection {
-          connection.post(hdrs, body_fn.(body))
+          connection.post(hdrs, Try { body_fn.(body) })
         }.curry
       end
 
@@ -73,7 +73,7 @@ module FoucaultHttp
       end
 
       def connection
-        -> encoding, address { HttpConnection.new.connection(address, encoding) }.curry
+        -> opts, encoding, address { HttpConnection.new.connection(address, opts, encoding) }.curry
       end
 
       def address
@@ -140,7 +140,7 @@ module FoucaultHttp
           when "application/json"
             json_parser
           when "application/xml", "application/soap+xml", "text/xml"
-            nil_parser
+            xml_parser
           else
             nil_parser
           end
@@ -175,6 +175,10 @@ module FoucaultHttp
 
       def json_parser
         -> response { JSON.parse(response.body) }
+      end
+
+      def xml_parser
+        -> response { Nokogiri::XML(response.body) }
       end
 
       def text_parser

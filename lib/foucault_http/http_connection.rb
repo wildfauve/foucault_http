@@ -10,8 +10,8 @@ module FoucaultHttp
 
     HTTP_CONNECTION_FAILURE = :http_connection_failure
 
-    def connection(address, encoding, cache_store = nil, instrumenter = nil)
-      @http_connection = Try { http_connection(address, encoding, cache_store, instrumenter) }
+    def connection(address, opts, encoding, cache_store = nil, instrumenter = nil)
+      @http_connection = Try { http_connection(address, opts, encoding, cache_store, instrumenter) }
       self
     end
 
@@ -27,9 +27,10 @@ module FoucaultHttp
 
     def post(hdrs, body)
       return @http_connection.to_result if @http_connection.failure?
+      return body.to_result if body.failure?
       Try {
         @http_connection.value_or.post do |r|
-          r.body = body
+          r.body = body.value_or
           r.headers = hdrs
         end
       }.to_result
@@ -46,8 +47,8 @@ module FoucaultHttp
 
     private
 
-    def http_connection(address, encoding, cache_store, instrumenter)
-      faraday_connection = Faraday.new(:url => address) do |faraday|
+    def http_connection(address, opts={}, encoding, cache_store, instrumenter)
+      faraday_connection = Faraday.new(opts.merge(url: address)) do |faraday|
         # faraday.use :http_cache, caching if caching
         faraday.request  encoding if encoding
         if Configuration.config.logger && Configuration.config.log_formatter

@@ -9,9 +9,10 @@ module FoucaultHttp
     class << self
 
       # Client interface
+
       def post
-        -> correlation, service, resource, hdrs, enc, body_fn, body {
-          HttpPort.post.(correlation, service, resource, hdrs, body_fn, enc, body)
+        -> correlation, service, resource, opts, hdrs, enc, body_fn, body {
+          HttpPort.post.(correlation, service, resource, opts, hdrs, body_fn, enc, body)
         }.curry
       end
 
@@ -30,8 +31,8 @@ module FoucaultHttp
       # Example
       # > get.(@env[:host], "/userinfo", {authorization: "Bearer <token> }, :url_encoded, {} )
       def get
-        -> correlation, service, resource, hdrs, enc, query {
-            HttpPort.get.(correlation, service, resource, hdrs, enc, query)
+        -> correlation, service, resource, opts, hdrs, enc, query {
+            HttpPort.get.(correlation, service, resource, opts, hdrs, enc, query)
         }.curry
       end
 
@@ -82,7 +83,7 @@ module FoucaultHttp
       end
 
       def json_body_fn
-        -> body { body.to_json }
+        -> body { JSON.generate(body) }
       end
 
 
