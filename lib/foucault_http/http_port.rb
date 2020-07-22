@@ -132,7 +132,7 @@ module FoucaultHttp
         -> type {
           case type
           when "text/html"
-            nil_parser
+            xml_parser
           when "text/plain"
             text_parser
           when "text/csv"
