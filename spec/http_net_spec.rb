@@ -91,7 +91,7 @@ RSpec.describe FoucaultHttp::Net do
 
       expect(result).to be_failure
       expect(result.failure.status).to be :system_failure
-      expect(result.failure.exception[:exception]).to eq "Content Type in response is nil"
+      expect(result.failure.exception[:exception]).to eq "Content Type in response is nil; body: {\"message\" : \"I am json\"} "
 
     end
 

@@ -148,7 +148,7 @@ module FoucaultHttp
       end
 
       def returned_response(response)
-        raise(NoContentTypeError.new("Content Type in response is nil")) unless response.value_or.headers["content-type"]
+        raise(NoContentTypeError.new("Content Type in response is nil; body: #{response.value_or.body}")) unless response.value_or.headers["content-type"]
         OpenStruct.new(
           status: evalulate_status.(response.value_or.status),
           code: response.value_or.status,
